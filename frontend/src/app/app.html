@@ -1,0 +1,16 @@
+<mat-toolbar color="primary" class="app-toolbar">
+  <span class="app-title">{{ title }}</span>
+  <span class="app-spacer"></span>
+  <a mat-button routerLink="/servicos" routerLinkActive="active-link">
+    <mat-icon>list_alt</mat-icon>
+    Servicos
+  </a>
+  <a mat-button routerLink="/processar" routerLinkActive="active-link">
+    <mat-icon>upload_file</mat-icon>
+    Processar documento
+  </a>
+</mat-toolbar>
+
+<main class="app-content">
+  <router-outlet />
+</main>

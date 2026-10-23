@@ -1,0 +1,66 @@
+.subtitulo {
+  color: rgba(0, 0, 0, 0.6);
+  margin-bottom: 1.5rem;
+}
+
+.upload-card {
+  padding: 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+
+  .campo-tipo {
+    flex: 0 0 160px;
+  }
+}
+
+.resultado-card {
+  padding: 1rem 1.5rem;
+
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.15rem;
+  }
+}
+
+.resultado-match h2 {
+  color: #2e7d32;
+}
+
+.resultado-alerta h2 {
+  color: #c62828;
+}
+
+.campo-extraido {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  margin-bottom: 0.5rem;
+
+  .rotulo {
+    font-weight: 500;
+    min-width: 110px;
+  }
+
+  .score {
+    color: rgba(0, 0, 0, 0.55);
+    font-size: 0.85rem;
+  }
+
+  .valor-vazio {
+    color: rgba(0, 0, 0, 0.45);
+    font-style: italic;
+  }
+}
+
+.diagnostico-item {
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+}

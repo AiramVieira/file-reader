@@ -1,0 +1,29 @@
+.app-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+
+  .app-title {
+    font-weight: 500;
+    margin-right: 1rem;
+  }
+
+  .app-spacer {
+    flex: 1 1 auto;
+  }
+
+  a mat-icon {
+    margin-right: 0.25rem;
+  }
+}
+
+.active-link {
+  opacity: 0.85;
+  text-decoration: underline;
+}
+
+.app-content {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}

@@ -1,0 +1,68 @@
+<h1>Processar documento</h1>
+<p class="subtitulo">Envie um novo arquivo para identificar automaticamente o servico e extrair Competencia e CNPJ.</p>
+
+<mat-card class="upload-card">
+  <div class="form-row">
+    <input type="file" (change)="aoSelecionarArquivo($event)" [disabled]="processando()" />
+  </div>
+  @if (processando()) {
+    <p>Processando...</p>
+  }
+</mat-card>
+
+@if (resultado(); as res) {
+  @if (res.status === 'MATCH') {
+    <mat-card class="resultado-card resultado-match">
+      <h2><mat-icon>check_circle</mat-icon> Servico identificado: {{ res.servicoIdentificado?.nome }}</h2>
+      <div class="campo-extraido">
+        <span class="rotulo">Competencia:</span>
+        @if (res.competenciaExtraida) {
+          <span class="valor">{{ res.competenciaExtraida }}</span>
+          <span class="score">(confianca: {{ (res.scoreCompetencia ?? 0) | number: '1.0-2' }})</span>
+        } @else {
+          <span class="valor-vazio">nao foi possivel extrair</span>
+        }
+      </div>
+      <div class="campo-extraido">
+        <span class="rotulo">CNPJ:</span>
+        @if (res.cnpjExtraido) {
+          <span class="valor">{{ res.cnpjExtraido }}</span>
+          <span class="score">(confianca: {{ (res.scoreCnpj ?? 0) | number: '1.0-2' }})</span>
+        } @else {
+          <span class="valor-vazio">nao foi possivel extrair</span>
+        }
+      </div>
+    </mat-card>
+  } @else if (res.status === 'NO_MATCH') {
+    <mat-card class="resultado-card resultado-alerta">
+      <h2><mat-icon>error_outline</mat-icon> Nenhum servico correspondeu a este documento</h2>
+      <p>Veja abaixo por que cada servico avaliado nao foi considerado compativel:</p>
+      @for (diag of res.diagnostico; track diag.servicoId) {
+        <div class="diagnostico-item">
+          <strong>{{ diag.nomeServico }}</strong>
+          @if (diag.termosBaixaFaltantes.length) {
+            <div>Termos de baixa faltantes: {{ diag.termosBaixaFaltantes.join(', ') }}</div>
+          }
+          @if (diag.termosNegacaoEncontrados.length) {
+            <div>Termos de negacao encontrados: {{ diag.termosNegacaoEncontrados.join(', ') }}</div>
+          }
+        </div>
+      }
+      @if (!res.diagnostico.length) {
+        <p>Nao ha nenhum servico cadastrado.</p>
+      }
+    </mat-card>
+  } @else if (res.status === 'AMBIGUO') {
+    <mat-card class="resultado-card resultado-alerta">
+      <h2><mat-icon>help_outline</mat-icon> Mais de um servico corresponde a este documento</h2>
+      <p>Revise os termos de baixa/negacao dos servicos abaixo para eliminar a ambiguidade:</p>
+      @for (diag of res.diagnostico; track diag.servicoId) {
+        @if (diag.elegivel) {
+          <div class="diagnostico-item">
+            <strong>{{ diag.nomeServico }}</strong>
+          </div>
+        }
+      }
+    </mat-card>
+  }
+}

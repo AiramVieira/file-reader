@@ -1,0 +1,46 @@
+.subtitulo {
+  color: rgba(0, 0, 0, 0.6);
+  margin-bottom: 1.5rem;
+}
+
+.form-card {
+  padding: 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+
+  h2 {
+    margin-top: 0;
+    font-size: 1.1rem;
+  }
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+
+  .campo-nome {
+    flex: 1 1 220px;
+  }
+
+  .campo-tipo {
+    flex: 0 0 160px;
+  }
+
+  .campo-descricao {
+    flex: 1 1 260px;
+  }
+
+  button {
+    margin-top: 8px;
+  }
+}
+
+.tabela-servicos {
+  width: 100%;
+}
+
+.vazio {
+  color: rgba(0, 0, 0, 0.6);
+  margin-top: 1rem;
+}

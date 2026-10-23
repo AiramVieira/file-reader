@@ -1,0 +1,163 @@
+@if (layout(); as layoutValue) {
+  <h1>{{ layoutValue.servico.nome }}</h1>
+
+  @if (!layoutValue.temArquivoBase) {
+    <mat-card class="upload-card">
+      <h2>Envie o arquivo-modelo</h2>
+      <p>Este arquivo define o layout: nele voce vai marcar a Competencia, o CNPJ e os termos de baixa/negacao.</p>
+      <input type="file" (change)="aoSelecionarArquivo($event)" [disabled]="enviando()" />
+    </mat-card>
+  } @else {
+    <div class="acoes-topo">
+      <span class="nome-arquivo"><mat-icon>description</mat-icon> {{ layoutValue.nomeArquivoBase }}</span>
+      <label class="trocar-arquivo">
+        <input type="file" (change)="aoSelecionarArquivo($event)" [disabled]="enviando()" hidden #inputTrocar />
+        <button mat-stroked-button (click)="inputTrocar.click()" [disabled]="enviando()">
+          <mat-icon>sync</mat-icon>
+          Trocar arquivo-modelo
+        </button>
+      </label>
+    </div>
+
+    <mat-card class="resumo-card">
+      <h2>Resumo do layout</h2>
+      <div class="resumo-linha">
+        <span class="resumo-rotulo">Competencia:</span>
+        @if (layoutValue.resumo.competencia) {
+          <span class="chip chip-competencia">{{ layoutValue.resumo.competencia }}</span>
+        } @else {
+          <span class="resumo-vazio">nao definida</span>
+        }
+      </div>
+      <div class="resumo-linha">
+        <span class="resumo-rotulo">CNPJ:</span>
+        @if (layoutValue.resumo.cnpj) {
+          <span class="chip chip-cnpj">{{ layoutValue.resumo.cnpj }}</span>
+        } @else {
+          <span class="resumo-vazio">nao definido</span>
+        }
+      </div>
+      <div class="resumo-linha">
+        <span class="resumo-rotulo">Termos para baixa:</span>
+        @for (termo of termosBaixa(); track termo.id) {
+          <span class="chip chip-baixa">
+            {{ termo.texto }}
+            <button type="button" class="chip-remover" (click)="removerMarcacao(termo)" aria-label="Remover termo">
+              <mat-icon>close</mat-icon>
+            </button>
+          </span>
+        } @empty {
+          <span class="resumo-vazio">nenhum</span>
+        }
+      </div>
+      <div class="resumo-linha">
+        <span class="resumo-rotulo">Termos de negacao:</span>
+        @for (termo of termosNegacao(); track termo.id) {
+          <span
+            class="chip chip-negacao"
+            [class.chip-alerta]="termo.presenteNoModelo"
+            [attr.title]="termo.presenteNoModelo ? 'Este termo aparece no proprio arquivo-modelo' : null"
+          >
+            @if (termo.presenteNoModelo) {
+              <mat-icon class="icone-alerta">warning</mat-icon>
+            }
+            {{ termo.texto }}
+            <button type="button" class="chip-remover" (click)="removerMarcacao(termo)" aria-label="Remover termo">
+              <mat-icon>close</mat-icon>
+            </button>
+          </span>
+        } @empty {
+          <span class="resumo-vazio">nenhum</span>
+        }
+      </div>
+      @if (temNegacaoNoModelo()) {
+        <p class="aviso-negacao">
+          <mat-icon>warning</mat-icon>
+          Termos com alerta aparecem no proprio arquivo-modelo: documentos iguais ao modelo nao serao reconhecidos por
+          este servico.
+        </p>
+      }
+      <form class="form-negacao" (ngSubmit)="adicionarTermoNegacao()">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Digitar termo de negacao</mat-label>
+          <input matInput [(ngModel)]="novoTermoNegacao" name="novoTermoNegacao" />
+          <mat-hint>Para termos que nao estao no arquivo-modelo. Varias palavras viram um unico termo unido por "_".</mat-hint>
+        </mat-form-field>
+        <button mat-stroked-button type="submit" [disabled]="!novoTermoNegacao.trim()">
+          <mat-icon>add</mat-icon>
+          Adicionar
+        </button>
+      </form>
+    </mat-card>
+
+    <mat-card class="preview-card">
+      <h2>Conteudo do arquivo</h2>
+      <p class="dica">
+        Clique em uma palavra para marcar Competencia, CNPJ, Termo para baixa ou Termo de negacao. Clique, segure e
+        arraste para selecionar varias palavras seguidas e marca-las como um unico termo.
+      </p>
+      <div class="preview-texto">
+        @for (token of layoutValue.tokens; track token.indice) {
+          <button
+            type="button"
+            class="token"
+            [class.selecionado]="emSelecao(token)"
+            [ngStyle]="estiloToken(token)"
+            (mousedown)="iniciarSelecao($event, token)"
+            (mouseenter)="estenderSelecao(token)"
+            (click)="aoClicarComTeclado($event, token)"
+          >{{ token.texto }}</button><span class="espaco">{{ token.espacoApos }}</span>
+        }
+      </div>
+    </mat-card>
+
+    <!-- Ancoras invisiveis posicionadas no ponto onde o clique foi solto -->
+    <span class="ancora-menu" #gatilhoToken [matMenuTriggerFor]="tokenMenu" (menuClosed)="limparSelecao()"></span>
+    <span class="ancora-menu" #gatilhoIntervalo [matMenuTriggerFor]="intervaloMenu" (menuClosed)="limparSelecao()"></span>
+
+    <mat-menu #tokenMenu="matMenu">
+      <ng-template matMenuContent>
+        @if (tokenSelecionado(); as token) {
+          <div class="menu-conteudo" (click)="$event.stopPropagation()">
+            @if (podeMarcarUnico(token, 'COMPETENCIA')) {
+              <mat-checkbox
+                [checked]="temMarcacaoNoToken(token, 'COMPETENCIA')"
+                (change)="alternarCampo(token, 'COMPETENCIA', $event)"
+              >Competencia</mat-checkbox>
+            }
+            @if (podeMarcarUnico(token, 'CNPJ')) {
+              <mat-checkbox
+                [checked]="temMarcacaoNoToken(token, 'CNPJ')"
+                (change)="alternarCampo(token, 'CNPJ', $event)"
+              >CNPJ</mat-checkbox>
+            }
+            <mat-checkbox
+              [checked]="temMarcacaoNoToken(token, 'TERMO_BAIXA')"
+              (change)="alternarCampo(token, 'TERMO_BAIXA', $event)"
+            >Termo para baixa</mat-checkbox>
+            <mat-checkbox
+              [checked]="temMarcacaoNoToken(token, 'TERMO_NEGACAO')"
+              (change)="alternarCampo(token, 'TERMO_NEGACAO', $event)"
+            >Termo de negacao</mat-checkbox>
+          </div>
+        }
+      </ng-template>
+    </mat-menu>
+
+    <mat-menu #intervaloMenu="matMenu">
+      <ng-template matMenuContent>
+        <div class="menu-termo" [attr.title]="textoSelecao()">{{ textoSelecao() }}</div>
+        <button mat-menu-item (click)="marcarIntervalo('TERMO_BAIXA')">
+          <mat-icon>check_circle</mat-icon>
+          Termo para baixa
+        </button>
+        <button mat-menu-item (click)="marcarIntervalo('TERMO_NEGACAO')">
+          <mat-icon>block</mat-icon>
+          Termo de negacao
+        </button>
+      </ng-template>
+    </mat-menu>
+  }
+} @else if (carregando()) {
+  <p>Carregando...</p>
+}
