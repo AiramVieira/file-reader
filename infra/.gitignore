@@ -1,0 +1,6 @@
+# Gerados por iniciar-tunel.ps1
+nginx/bin/
+nginx/logs/
+nginx/temp/
+nginx/conf/mime.types
+.estado/

@@ -1,0 +1,9 @@
+**/.git
+**/node_modules
+**/.angular
+**/dist
+**/target
+**/uploads
+.claude
+arquivos-teste
+infra/nginx
